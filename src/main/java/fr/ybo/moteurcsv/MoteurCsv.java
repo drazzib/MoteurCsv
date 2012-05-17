@@ -197,6 +197,11 @@ public class MoteurCsv {
 			return;
 		}
 		ClassCsv classCsv = new ClassCsv(fichierCsv.separateur(), clazz);
+		extractFields(clazz, classCsv);
+		mapFileClasses.put(fichierCsv.value(), classCsv);
+	}
+
+	protected void extractFields(final Class<?> clazz, final ClassCsv classCsv) {
 		for (Field field : clazz.getDeclaredFields()) {
 			BaliseCsv baliseCsv = field.getAnnotation(BaliseCsv.class);
 			if (baliseCsv != null) {
@@ -204,7 +209,11 @@ public class MoteurCsv {
 				classCsv.putOrdre(baliseCsv.value(), baliseCsv.ordre());
 			}
 		}
-		mapFileClasses.put(fichierCsv.value(), classCsv);
+
+		if (clazz.getSuperclass() != null) {
+			Class<?> superClazz = clazz.getSuperclass();
+			extractFields(superClazz, classCsv);
+		}
 	}
 
 	private void writeEntete(BufferedWriter bufWriter, Iterable<String> nomChamps, ClassCsv classCsv)
